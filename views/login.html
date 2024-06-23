@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+        
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            background: #1f5883;
+        }
+        
+        .login-form {
+            width: 400px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            text-align: center;
+        }
+        
+        .login-form h2 {
+            font-size: 2em;
+            color: #1f5883;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .login-form .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .login-form .input-group input {
+            width: 100%;
+            padding: 15px 10px 10px;
+            border: 2px solid #1f5883;
+            border-radius: 4px;
+            background: #ffffff;
+            outline: none;
+            font-size: 1em;
+            color: #333;
+            transition: border 0.3s ease;
+        }
+        
+        .login-form .input-group input:focus {
+            border: 2px solid #1f5883;
+        }
+        
+        .login-form .input-group label {
+            position: absolute;
+            top: 15px;
+            left: 10px;
+            color: #888;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .login-form .input-group input:focus ~ label,
+        .login-form .input-group input:not(:placeholder-shown) ~ label {
+            top: -10px;
+            left: 10px;
+            font-size: 0.8em;
+            color: #1f5883;
+            background: #ffffff;
+            padding: 0 5px;
+        }
+        
+        .login-form .links {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        
+        .login-form .links a {
+            color: #1f5883;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-form .links a:hover {
+            text-decoration: underline;
+        }
+        
+        .login-form .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background: #1f5883;
+            color: #ffffff;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .login-form .btn:hover {
+            background: #174a6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <form class="login-form" action="/login" method="post">
+            <h2>Admin Login</h2>
+            <div class="input-group">
+                <input type="text" id="username" name="username" required>
+                <label for="username">Username</label>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" name="password" required>
+                <label for="password">Password</label>
+            </div>
+            <div class="links">
+                <a href="#">Change Password</a>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+    </div>
+</body>
+</html>

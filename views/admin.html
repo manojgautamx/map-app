@@ -1,0 +1,661 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Admin - Add Location</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <style>
+            body, html {
+                height: 100%;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                font-family: Roboto;
+            }
+
+            #map {
+                flex: 1;
+                margin-right: 240px;
+                transition: margin-right 0.3s ease;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                right: 0; /* Initially hide the sidebar */
+                width: 200px;
+                height: 100%;
+                background: #f4f4f4;
+                padding: 20px;
+                box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+                display: flex;
+                flex-direction: column;
+                transition: right 0.3s ease;
+                z-index: 1000; /* Make sure sidebar is above the map and navbar */
+            }
+
+            .navbar2 {
+                margin-top: 50px;
+            }
+
+            .sidebar.close {
+                right: -240px;
+            }
+
+            .navbar {
+                width: 100%;
+                background: #1f5883;
+                color: white;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                z-index: 1001; 
+                height: 30px;
+            }
+
+            .navbar h1 {
+                margin: 0px 50px;
+                font-size: 1.2em;
+            }
+
+            .location-list {
+                list-style: none;
+                padding: 0;
+                overflow-y: auto;
+                flex-grow: 1;
+            }
+
+            .location-list li {
+                padding: 5px 7px;
+                margin: 3px 0;
+                background-color: #f0f0f0;
+                transition: all 0.3s ease-in-out;
+            }
+            /* Hover animation */
+            .location-list li:hover {
+                color: #fff;
+                background-color: #b0a101; /* Change background color to blue */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .location-list li:active {
+                background-color: #c6b500; /* Change background color to blue */
+            }
+
+            .popup-content {
+                padding: 3px; /* Adjust padding as needed */
+                font-size: 10px; /* Increase font size for better readability */
+                max-width: 400px; /* Limit popup width for better fitting on screen */
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* Two columns layout */
+                grid-column-gap: 20px; /* Gap between columns */
+            }
+
+            .popup-content h4 {
+                margin-top: 0; /* Remove default margin for h4 */
+                font-size: 20px; /* Increase heading font size for emphasis */
+                grid-column: span 2; /* Span both columns */
+            }
+
+            .popup-content img {
+                width: 40px; /* Make the image responsive to its container */
+                height: auto;
+                margin-bottom: 5px; /* Add some bottom margin for separation */
+                grid-column: span 2; /* Span both columns */
+            }
+
+            .popup-content p {
+                margin: 5px 0px; /* Adjust paragraph margins */
+            }
+
+            .popup-content strong {
+                font-weight: bold; /* Ensure strong tags are bold */
+            }
+
+            .image-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                justify-content: center;
+                align-items: center;
+                z-index: 2000;
+            }
+
+            .image-overlay img {
+                max-width: 90%;
+                max-height: 90%;
+            }
+
+            .close-button {
+                position: absolute;
+                top: 50px;
+                right: 30px;
+                color: white;
+                font-size: 30px;
+                cursor: pointer;
+            }
+
+
+            .toggle-button {
+                background-color: #1f5883;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                cursor: pointer;
+                margin-right: 50px;
+                font-size: 15px;
+            }
+
+            /* logout button */
+
+            /* CSS */
+            .button-logout {
+                appearance: button;
+                backface-visibility: hidden;
+                background-color: #da0000;
+                border-radius: 6px;
+                border-width: 0;
+                box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0,rgba(0, 0, 0, .07) 0 1px 1px 0;
+                box-sizing: border-box;
+                color: #fff;
+                cursor: pointer;
+                font-family: -apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif;
+                font-size: 100%;
+                height: 44px;
+                line-height: 1.15;
+                margin: 12px 0 0;
+                margin-bottom: 10px;
+                outline: none;
+                overflow: hidden;
+                padding: 0 25px;
+                position: relative;
+                text-align: center;
+                text-transform: none;
+                transform: translateZ(0);
+                transition: all .2s,box-shadow .08s ease-in;
+                user-select: none;
+                -webkit-user-select: none;
+                touch-action: manipulation;
+                width: 100%;
+            }
+
+            .button-logout:disabled {
+                cursor: default;
+            }
+
+            .button-logout:hover, .button-logout:active {
+                background-color: rgb(199, 0, 0);
+            }
+
+            .button-logout:focus {
+            box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .2) 0 6px 15px 0, rgba(0, 0, 0, .1) 0 2px 2px 0, rgba(50, 151, 211, .3) 0 0 0 4px;
+            }
+
+            /* add location */
+            .button-addloc {
+                background-color: #1f5883;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                cursor: pointer;
+                border-radius: 5px;
+                font-size: 1em;
+            }
+            
+            .button-addloc:hover {
+                background-color: #174a6b;
+            }
+
+            /* Modal styles */
+            .modal {
+                display: none; 
+                position: fixed; 
+                z-index: 2000; /* Ensure it's above other content */
+                left: 0;
+                top: 10px;
+                width: 100%; 
+                height: 100%; 
+                overflow: auto; 
+                background-color: rgba(0,0,0,0.5); 
+                justify-content: center; 
+                align-items: center; 
+            }
+            
+            .modal-content {
+                background-color: #fff;
+                margin: auto; 
+                padding: 10px; /* Adjust padding as needed */
+                border: 1px solid #888;
+                width: 80%; 
+                max-width: 600px; 
+                border-radius: 10px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Additional styles for full-screen overlay */
+            .modal-fullscreen {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                max-width: none;
+                border-radius: 0;
+            }
+
+            /* Adjustments for smaller screens */
+            @media (max-width: 768px) {
+                .sidebar {
+                    width: 100%;
+                    right: -100%; /* Hide sidebar by default on smaller screens */
+                }
+                
+                .sidebar.open {
+                    right: 0; /* Slide in the sidebar when open */
+                }
+                
+                .toggle-button {
+                    margin-right: 20px;
+                    font-size: 20px;
+                    padding: 8px 12px;
+                }
+                
+                .location-list li {
+                    font-size: 0.9em; /* Adjust font size for smaller screens */
+                }
+
+                .popup-content {
+                    font-size: 0.9em; /* Adjust font size for smaller screens */
+                }
+                
+                .navbar h1 {
+                    font-size: 1.2em; /* Adjust heading font size for smaller screens */
+                    margin: 10px 20px;
+                }
+            }
+
+            /* General button styling */
+            .button {
+                background-color: #1f5883;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                cursor: pointer;
+                border-radius: 5px;
+                font-size: 1em;
+            }
+
+            .button:hover {
+                background-color: #174a6b;
+            }
+
+            /* Form styles */
+            .form-group {
+                margin-bottom: 20px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-group label {
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            .form-group input[type=text], 
+            .form-group input[type=email], 
+            .form-group textarea {
+                padding: 10px;
+                font-size: 0.9em; /* Adjust input font size */
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            }
+
+            .form-group input[type=text]:focus, 
+            .form-group input[type=email]:focus, 
+            .form-group textarea:focus {
+                outline: none;
+                border-color: #1f5883;
+                box-shadow: 0 0 0 3px rgba(31, 88, 131, 0.1);
+            }
+
+            .form-group textarea {
+                resize: vertical; /* Allow vertical resizing of textarea */
+            }
+
+            /* Two-column layout for form */
+            .form-group.two-column {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            /* Submit button */
+            .form-group.submit-button {
+                align-self: flex-start;
+            }
+
+            .form-group.submit-button button {
+                width: 100%;
+                padding: 12px;
+                font-size: 1em;
+                background-color: #1f5883;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            .form-group.submit-button button:hover {
+                background-color: #174a6b;
+            }
+
+            .change-password {
+                text-decoration: none;
+                padding: 10px;
+                margin: 22px 22px;
+            }
+
+            /* logo style */
+            .logo {
+                width: 50px;
+                height: auto;
+                margin-left: 50px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="navbar">
+            <a href="https://lcda.gandaki.gov.np/"><img class="logo" src="/img/logo.png" alt="logo"></a>
+            <h1>Gandaki Lake Map</h1>
+            <button class="toggle-button" onclick="toggleSidebar()"><i class="fa fa-fw fa-bars"></i></button>
+        </div>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="navbar2">
+                <h1>Welcome, admin!</h1>
+                <button class="button-logout" onclick="location.href='/logout'">Logout</button> <!-- Logout button -->
+                <a class="change-password" href="#">Change Password</a>
+
+                <button class="button-addloc" id="addLocationBtn">Add Location</button>
+            </div>
+
+            <div id="addLocationModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h1>Add Location</h1>
+                    <form class="location-form" id="add-location-form" action="/add-location" method="post" enctype="multipart/form-data">
+                        <label for="title">Title:</label>
+                        <input type="text" id="title" name="Title" required>
+                        
+                        <label for="latitude">Latitude:</label>
+                        <input type="number" step="any" id="latitude" name="Latitude" required>
+        
+                        <label for="Longitude">Longitude:</label>
+                        <input type="number" step="any" id="longitude" name="Longitude" required>
+        
+                        <label for="image">Image:</label>
+                        <input type="file" id="image" name="image">
+
+                        <label for="Elevation_m">Elevation:</label>
+                        <input type="text" id="elevation_m" name="Elevation_m">
+
+                        <label for="basin">Basin Name:</label>
+                        <input type="text" id="basin" name="Basin_Name">
+                        
+                        <label for="area_km2">Area (km²):</label>
+                        <input type="number" step="any" id="area_km2" name="Area_km2">
+                        
+                        <label for="area_ha">Area (ha):</label>
+                        <input type="number" step="any" id="area_ha" name="Area_ha">
+                        
+                        <label for="perimeter">Perimeter:</label>
+                        <input type="number" step="any" id="perimeter" name="Perimeter">
+                        
+                        <label for="error_km2">Error (km²):</label>
+                        <input type="number" step="any" id="error_km2" name="Error_km2">
+                        
+                        <label for="error_ha">Error (ha):</label>
+                        <input type="number" step="any" id="error_ha" name="Error_ha">
+                        
+                        <label for="district">District:</label>
+                        <input type="text" id="district" name="District">
+                        
+                        <label for="gapa_napa">RM/M:</label>
+                        <input type="text" id="gapa_napa" name="GaPa_NaPa">
+                        
+                        <label for="ward_no">Ward No:</label>
+                        <input type="text" id="ward_no" name="Ward_No">
+        
+                        <label for="further_comments">Further Comments:</label>
+                        <textarea id="further_comments" name="further_comments"></textarea>
+        
+                        <label for="reference">Reference:</label>
+                        <input type="text" id="reference" name="reference">
+                        
+                        <input type="submit" value="Add Location">
+                    </form>
+                </div>
+            </div>
+            <div>
+                <form id="upload-form" action="/upload-excel" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="excelFile" accept=".xls,.xlsx" required>
+                    <button type="submit">Upload</button>
+                </form>
+            </div>
+            <div>
+                <form action="/delete-all-locations" method="POST" onsubmit="return confirm('Are you sure you want to delete all locations?');">
+                    <button type="submit">Delete All Locations</button>
+                </form>
+            </div>    
+                <div>
+                    <h2>Lakes</h2>
+                    <ul id="locations-list" class="location-list"></ul>
+                </div>
+        </div>
+
+        
+
+        <div id="map"></div>
+
+        <div id="image-overlay" class="image-overlay">
+            <span class="close-button" onclick="closeOverlay()">&times;</span>
+            <img id="overlay-image" src="" alt="Overlay Image">
+        </div>
+    </body>
+        
+
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var map = document.getElementById('map');
+            sidebar.classList.toggle('close');
+            if (sidebar.classList.contains('close')) {
+                map.style.marginRight = '0';
+            } else {
+                map.style.marginRight = '240px';
+            }
+        }
+
+        var map = L.map('map').setView([28.242, 83.9986], 8.5);
+        var esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(map);
+
+        var topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap'
+        });
+
+        var baseMaps = {
+            "ESRI World Imagery": esriLayer,
+            "OpenTopoMap": topoLayer
+        };
+
+        L.control.layers(baseMaps).addTo(map);
+
+        fetch('/nepal-states.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: {
+                        color: '#3388ff', // Border color
+                        weight: 2, // Border thickness
+                        fillOpacity: 0.1 // Transparency of the fill
+                    }
+                }).addTo(map);
+            });
+
+
+        function zoomToLocation(lat, lng) { //Changes here
+            map.setView([lat, lng], 17); // Adjust zoom level as necessary
+        }
+
+        function openOverlay(imageSrc) {
+            document.getElementById('overlay-image').src = imageSrc;
+            document.getElementById('image-overlay').style.display = 'flex';
+        }
+
+        function closeOverlay() {
+            document.getElementById('image-overlay').style.display = 'none';
+        }
+
+        // Fetch locations and add markers
+        fetch('/locations')
+        .then(response => response.json())
+        .then(locations => {
+            locations.forEach(location => {
+                // Construct popup content with all details
+                var popupContent = `
+                    <div class="popup-content">
+                        <h4>${location.Title}</h4>
+                        <img src="${location.image}" alt="${location.Title}" onclick="openOverlay('${location.image}')">
+                        <div>
+                            <p><strong>Coordinates:</strong> ${location.Latitude}, ${location.Longitude}</p>
+                            <p><strong>Elevation:</strong> ${location.Elevation_m} m</p>
+                            <p><strong>Basin Name:</strong> ${location.Basin_Name}</p>
+                            <p><strong>Area:</strong> ${location.Area_km2} km² (${location.Area_ha} ha)</p>
+                        </div>
+                        <div>
+                            <p><strong>Perimeter:</strong> ${location.Perimeter} km</p>
+                            <p><strong>Error (Area):</strong> ${location.Error_km2} km² (${location.Error_ha} ha)</p>
+                            <p><strong>District:</strong> ${location.District}</p>
+                            <p><strong>GaPa_NaPa:</strong> ${location.GaPa_NaPa}</p>
+                            <p><strong>Ward No:</strong> ${location.Ward_No}</p>
+                        </div>
+                        <div>
+                            <button onclick="openEditForm(${location.id})">Edit</button>
+                            <button onclick="deleteLocation(${location.id})"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>`;
+
+                    var marker = L.marker([location.Latitude, location.Longitude]).addTo(map);
+                    marker.bindPopup(popupContent);
+
+                    // Add location title to the list
+                    var li = document.createElement('li');
+                    li.textContent = location.Title;
+                    li.addEventListener('click', function() {
+                        zoomToLocation(location.Latitude, location.Longitude);
+                        marker.openPopup();
+                        // toggleSidebar(); // Close sidebar after clicking on a location
+                    });
+                    document.getElementById('locations-list').appendChild(li);
+                });
+            })
+            .catch(error => console.error('Error fetching locations:', error));
+
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const addLocationBtn = document.getElementById('addLocationBtn');
+                const addLocationModal = document.getElementById('addLocationModal');
+                const closeBtn = addLocationModal.querySelector('.close');
+
+                addLocationBtn.addEventListener('click', () => {
+                    addLocationModal.style.display = 'flex';
+                });
+
+                closeBtn.addEventListener('click', () => {
+                    addLocationModal.style.display = 'none';
+                });
+
+                window.addEventListener('click', (event) => {
+                    if (event.target === addLocationModal) {
+                        addLocationModal.style.display = 'none';
+                    }
+                });
+            });
+
+
+        function openEditForm(id) {
+                fetch(`/location/${id}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(location => {
+                        // Populate your form or modal fields with the fetched location data
+                        document.getElementById('title').value = location.Title;
+                        document.getElementById('latitude').value = location.Latitude;
+                        document.getElementById('longitude').value = location.Longitude;
+                        document.getElementById('elevation_m').value = location.Elevation_m;
+                        document.getElementById('basin').value = location.Basin_Name || '';
+                        document.getElementById('area_km2').value = location.Area_km2 || '';
+                        document.getElementById('area_ha').value = location.Area_ha || '';
+                        document.getElementById('perimeter').value = location.Perimeter || '';
+                        document.getElementById('error_km2').value = location.Error_km2 || '';
+                        document.getElementById('error_ha').value = location.Error_ha || '';
+                        document.getElementById('district').value = location.District || '';
+
+                        // Assuming you have a form to update the location, set its action URL
+                        document.getElementById('update-location-form').action = `/update-location/${id}`;
+
+                        // Show your modal or form after populating data
+                        var modal = document.getElementById('addLocationModal');
+                        modal.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching location:', error);
+                        // Handle error scenario, e.g., show an alert to the user
+                        alert('Failed to fetch location data. Please try again later.');
+                    });
+            }
+
+            function deleteLocation(id) {
+        // Confirm before deletion
+            if (confirm('Are you sure you want to delete this location?')) {
+                fetch(`/delete-location/${id}`, {
+                    method: 'POST' // Ensure it's a POST request
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Optionally handle success
+                        window.location.reload(); // Reload page or update UI as needed
+                    } else {
+                        throw new Error('Failed to delete location');
+                    }
+                })
+                .catch(error => console.error('Error deleting location:', error));
+            }
+        }
+
+
+
+        </script>
+    </body>
+    </html>

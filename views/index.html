@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gandaki Lake Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            font-family: Roboto;
+        }
+
+        #map {
+            flex: 1;
+            transition: margin-right 0.3s ease;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px; /* Initially hide the sidebar */
+            width: 200px;
+            height: 100%;
+            background: #f4f4f4;
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s ease;
+            z-index: 1000; /* Make sure sidebar is above the map and navbar */
+        }
+
+        .navbar2 {
+            margin-top: 50px;
+        }
+
+        .sidebar.open {
+            right: 0; /* Show the sidebar */
+        }
+
+        .navbar {
+            width: 100%;
+            background: #1f5883;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1001; 
+        }
+
+        .navbar h1 {
+            margin: 10px 50px;
+            font-size: 1.5em;
+        }
+
+        .location-list {
+            list-style: none;
+            padding: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .location-list li {
+            padding: 10px 15px;
+            font-weight: bold;
+            margin: 5px 0;
+            background-color: #f0f0f0;
+            transition: all 0.3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        /* Hover animation */
+        .location-list li:hover {
+            color: #fff;
+            background-color: #b0a101; /* Change background color to blue */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .location-list li:active {
+            background-color: #c6b500;
+            border-radius: 10px;
+        }
+
+        .popup-content {
+            padding: 3px; /* Adjust padding as needed */
+            font-size: 10px; /* Increase font size for better readability */
+            max-width: 300px; /* Limit popup width for better fitting on screen */
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns layout */
+            grid-column-gap: 10px; /* Gap between columns */
+        }
+
+        .popup-content h4 {
+            margin-top: 0; /* Remove default margin for h4 */
+            font-size: 11px; /* Increase heading font size for emphasis */
+            grid-column: span 2; /* Span both columns */
+        }
+
+        .popup-content img {
+            width: 40px; /* Make the image responsive to its container */
+            height: auto;
+            margin-bottom: 5px; /* Add some bottom margin for separation */
+            grid-column: span 2; /* Span both columns */
+        }
+
+        .popup-content p {
+            margin: 5px 0px; /* Adjust paragraph margins */
+        }
+
+        .popup-content strong {
+            font-weight: bold; /* Ensure strong tags are bold */
+        }
+
+        .image-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .image-overlay img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+
+        .toggle-button {
+            background-color: #1f5883;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-right: 50px;
+            font-size: 25px;
+        }
+
+        /* login button */
+
+        /* CSS */
+        .button-9 {
+            appearance: button;
+            backface-visibility: hidden;
+            background-color: #1f5883;
+            border-radius: 6px;
+            border-width: 0;
+            box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0,rgba(0, 0, 0, .07) 0 1px 1px 0;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            font-family: -apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif;
+            font-size: 100%;
+            height: 44px;
+            line-height: 1.15;
+            margin: 12px 0 0;
+            outline: none;
+            overflow: hidden;
+            padding: 0 25px;
+            position: relative;
+            text-align: center;
+            text-transform: none;
+            transform: translateZ(0);
+            transition: all .2s,box-shadow .08s ease-in;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            width: 100%;
+        }
+
+        .button-9:disabled {
+            cursor: default;
+        }
+
+        .button-9:hover, .button-9:active {
+            background-color: rgb(0, 45, 94);
+        }
+
+        .button-9:focus {
+        box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .2) 0 6px 15px 0, rgba(0, 0, 0, .1) 0 2px 2px 0, rgba(50, 151, 211, .3) 0 0 0 4px;
+        }
+
+        /* search button */
+
+        .search-container{
+            background: #fff;
+            height: 20px;
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.8s;
+            /*box-shadow:inset 2px 2px 2px 0px rgba(255,255,255,.5),
+            inset -7px -7px 10px 0px rgba(0,0,0,.1),
+        7px 7px 20px 0px rgba(0,0,0,.1),
+        4px 4px 5px 0px rgba(0,0,0,.1);
+        text-shadow:  0px 0px 6px rgba(255,255,255,.3),
+                    -4px -4px 6px rgba(116, 125, 136, .2);
+        text-shadow: 2px 2px 3px rgba(255,255,255,0.5);*/
+        box-shadow:  4px 4px 6px 0 rgba(255,255,255,.3),
+                    -4px -4px 6px 0 rgba(116, 125, 136, .2), 
+            inset -4px -4px 6px 0 rgba(255,255,255,.2),
+            inset 4px 4px 6px 0 rgba(0, 0, 0, .2);
+        }
+
+        .search-container:hover > .search-input{
+            width: 150px;
+        }
+
+        .search-container .search-input{
+            background: transparent;
+            border: none;
+            outline:none;
+            width: 0px;
+            font-weight: 400;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .search-container .search-btn .fa{
+            color: #5cbdbb;
+        }
+
+        .icon {
+            color: #1f5883;
+        }
+
+        @keyframes hoverShake {
+        0% {transform: skew(0deg,0deg);}
+        25% {transform: skew(5deg, 5deg);}
+        75% {transform: skew(-5deg, -5deg);}
+        100% {transform: skew(0deg,0deg);}
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Gandaki Lake Map</h1>
+        <button class="toggle-button" onclick="toggleSidebar()"><i class="fa fa-fw fa-home"></i></button>
+    </div>
+    
+    <div class="sidebar" id="sidebar">
+        <div class="navbar2">
+            <button class="button-9" onclick="location.href='/login'">Login</button> <!-- Added login button -->
+        </div>
+        <div>
+            <h2>Lakes</h2>
+            <div class="search-container">
+                <input type="text" name="search" placeholder="Search..." class="search-input" onkeyup="searchLocations()">
+                <i class="fa fa-search icon"></i>      
+            </div>
+            <ul id="locations-list" class="location-list"></ul>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="image-overlay" class="image-overlay">
+        <span class="close-button" onclick="closeOverlay()">&times;</span>
+        <img id="overlay-image" src="" alt="Overlay Image">
+    </div>
+</body>
+
+    <script src="./data/leaflet-geojson-vt.js"></script>
+    <script src="https://unpkg.com/geojson-vt@3.2.0/geojson-vt.js"></script>
+
+    <script src="./data/nepal-states.js"></script>
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var map = document.getElementById('map');
+            sidebar.classList.toggle('open');
+            if (sidebar.classList.contains('open')) {
+                map.style.marginRight = '240px'; // Shrink map when sidebar is open
+            } else {
+                map.style.marginRight = '0'; // Reset map size when sidebar is closed
+            }
+        }
+
+        var map = L.map('map').setView([28.3949, 84.1240], 7);
+        var esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(map);
+
+
+        var topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap'
+        });
+
+
+        var baseMaps = {
+            "ESRI World Imagery": esriLayer,
+            "OpenTopoMap": topoLayer
+        };
+
+        L.control.layers(baseMaps).addTo(map);
+
+        function zoomToLocation(lat, lng) {
+            map.setView([lat, lng], 12); // Adjust zoom level as necessary
+        }
+
+        function openOverlay(imageSrc) {
+        document.getElementById('overlay-image').src = imageSrc;
+        document.getElementById('image-overlay').style.display = 'flex';
+        }
+
+        function closeOverlay() {
+            document.getElementById('image-overlay').style.display = 'none';
+        }
+
+        
+        // Fetch locations and add markers
+        fetch('/locations')
+            .then(response => response.json())
+            .then(locations => {
+                locations.forEach(location => {
+                    // Construct popup content with all details
+                    var popupContent = `
+                        <div class="popup-content">
+                            <h4>${location.title}</h4>
+                            <img src="${location.image}" alt="${location.title}" onclick="openOverlay('${location.image}')">
+                            <div>
+                                <p><strong>Coordinates:</strong> ${location.latitude}, ${location.longitude}</p>
+                                <p><strong>Country:</strong> ${location.country}</p>
+                                <p><strong>Major RGI Region:</strong> ${location.major_rgi_region}</p>
+                                <p><strong>Mountain Range:</strong> ${location.mountain_range}</p>
+                                <p><strong>Glacier:</strong> ${location.glacier}</p>
+                                <p><strong>RGI Glacier ID:</strong> ${location.rgi_glacier_id}</p>
+                                <p><strong>RGI Glacier Area:</strong> ${location.rgiGlacierArea}</p>
+                                <p><strong>Lake Name:</strong> ${location.lakeName}</p>
+                                <p><strong>Lake Type:</strong> ${location.lakeType}</p>
+                                <p><strong>Outburst Mechanism:</strong> ${location.outburstMechanism}</p>
+                                <p><strong>River:</strong> ${location.river}</p>
+                                <p><strong>Date Range:</strong> ${location.minDate} - ${location.maxDate}</p>
+                                <p><strong>Mean Lake Volume:</strong> ${location.meanLakeVolume}</p>
+                                <p><strong>Min Lake Volume:</strong> ${location.minLakeVolume}</p>
+                                <p><strong>Max Lake Volume:</strong> ${location.maxLakeVolume}</p>
+                                <p><strong>Lake Volume Determination:</strong> ${location.lakeVolumeDetermination}</p>
+                                <p><strong>Mean Flood Volume:</strong> ${location.meanFloodVolume}</p>
+                            </div>
+                            <div>
+                                <p><strong>Min Flood Volume:</strong> ${location.minFloodVolume}</p>
+                                <p><strong>Max Flood Volume:</strong> ${location.maxFloodVolume}</p>
+                                <p><strong>Flood Volume Determination:</strong> ${location.floodVolumeDetermination}</p>
+                                <p><strong>Peak Discharge:</strong> ${location.peakDischarge}</p>
+                                <p><strong>Min Peak Discharge:</strong> ${location.minPeakDischarge}</p>
+                                <p><strong>Max Peak Discharge:</strong> ${location.maxPeakDischarge}</p>
+                                <p><strong>Peak Discharge Determination:</strong> ${location.peakDischargeDetermination}</p>
+                                <p><strong>Lake Area Before:</strong> ${location.lakeAreaBefore}</p>
+                                <p><strong>Lake Area After:</strong> ${location.lakeAreaAfter}</p>
+                                <p><strong>Impact and Destruction:</strong> ${location.impactAndDestruction}</p>
+                                <p><strong>Further Comments:</strong> ${location.furtherComments}</p>
+                                <p><strong>First Reference Found:</strong> ${location.firstReferenceFound}</p>
+                                <p><strong>Reference:</strong> ${location.reference}</p>
+                            </div>
+                        </div>`;
+
+                    var marker = L.marker([location.latitude, location.longitude]).addTo(map);
+                    marker.bindPopup(popupContent);
+                    
+                    // Add location title to the list
+                    var li = document.createElement('li');
+                    li.textContent = location.title;
+                    li.addEventListener('click', function() {
+                        zoomToLocation(location.latitude, location.longitude);
+                        marker.openPopup();
+                        toggleSidebar(); // Close sidebar after clicking on a location
+                    });
+                    document.getElementById('locations-list').appendChild(li);
+                });
+            })
+            .catch(error => console.error('Error fetching locations:', error));
+
+            function populateLocationList() {
+            var locationsList = document.getElementById('locations-list');
+            locationsList.innerHTML = '';
+
+            locations.forEach(location => {
+                var li = document.createElement('li');
+                li.textContent = location.title;
+                locationsList.appendChild(li);
+            });
+        }
+
+        populateLocationList();
+
+        // Search function
+        function searchLocations() {
+            var input = document.querySelector('.search-input').value.toLowerCase();
+            var locationListItems = document.querySelectorAll('#locations-list li');
+
+            locationListItems.forEach(function(item) {
+                var text = item.textContent.toLowerCase();
+                if (text.includes(input)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+            var options = {
+            maxZoom: 16,
+            tolerance: 3,
+            debug: 0,
+            style: {
+                fillColor: "#00000",
+                color: "#fffff",
+            },
+        };
+        var vtLayer = L.geoJson.vt(nepal, options).addTo(map);
+
+
+    </script>
+</html>
