@@ -14,6 +14,7 @@
             body, html {
                 height: 100%;
                 margin: 0;
+                padding: 0;
                 display: flex;
                 flex-direction: column;
                 font-family: Roboto;
@@ -21,31 +22,32 @@
 
             #map {
                 flex: 1;
-                margin-right: 240px;
+                margin-right: 220px;
                 transition: margin-right 0.3s ease;
             }
 
             .sidebar {
                 position: fixed;
                 top: 0;
-                right: 0; /* Initially hide the sidebar */
-                width: 200px;
+                right: 0;
+                width: 180px;
                 height: 100%;
                 background: #f4f4f4;
-                padding: 20px;
+                padding: 15px;
                 box-shadow: -2px 0 5px rgba(0,0,0,0.1);
                 display: flex;
                 flex-direction: column;
                 transition: right 0.3s ease;
-                z-index: 1000; /* Make sure sidebar is above the map and navbar */
+                z-index: 1000;
             }
 
             .navbar2 {
                 margin-top: 50px;
+                padding: 5px 5px;
             }
 
             .sidebar.close {
-                right: -240px;
+                right: -220px;
             }
 
             .navbar {
@@ -66,28 +68,37 @@
                 font-size: 1.2em;
             }
 
+            .location-container {
+                flex-grow: 1;
+                overflow-y: auto;
+                margin-top: 10px;
+            }
+
             .location-list {
                 list-style: none;
                 padding: 0;
+                margin: 0;
                 overflow-y: auto;
                 flex-grow: 1;
             }
 
             .location-list li {
                 padding: 5px 7px;
+                font-size: 15px;
                 margin: 3px 0;
                 background-color: #f0f0f0;
                 transition: all 0.3s ease-in-out;
             }
+
             /* Hover animation */
             .location-list li:hover {
                 color: #fff;
-                background-color: #b0a101; /* Change background color to blue */
+                background-color: #b0a101; /* Change background color to yellow */
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             }
 
             .location-list li:active {
-                background-color: #c6b500; /* Change background color to blue */
+                background-color: #c6b500; /* Change background color to darker yellow */
             }
 
             .popup-content {
@@ -161,7 +172,7 @@
             /* logout button */
 
             /* CSS */
-            .button-logout {
+            .button-logout, .button-addloc, .button-upload, .button-delete {
                 appearance: button;
                 backface-visibility: hidden;
                 background-color: #da0000;
@@ -172,10 +183,10 @@
                 color: #fff;
                 cursor: pointer;
                 font-family: -apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif;
-                font-size: 100%;
-                height: 44px;
+                font-size: 12px;
+                height: 30px;
                 line-height: 1.15;
-                margin: 12px 0 0;
+                margin: 0 0 0;
                 margin-bottom: 10px;
                 outline: none;
                 overflow: hidden;
@@ -206,51 +217,125 @@
             /* add location */
             .button-addloc {
                 background-color: #1f5883;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                cursor: pointer;
-                border-radius: 5px;
-                font-size: 1em;
             }
             
             .button-addloc:hover {
                 background-color: #174a6b;
             }
 
+            /* upload button */
+            /* Style the file input button */
+            #upload-form input[type="file"] {
+                font-size: 12px;
+                padding: 5px;
+            }
+
+            .button-upload {
+                background-color: #28a745;
+            }
+
+
             /* Modal styles */
             .modal {
-                display: none; 
-                position: fixed; 
+                display: none;
+                position: fixed;
                 z-index: 2000; /* Ensure it's above other content */
                 left: 0;
-                top: 10px;
-                width: 100%; 
-                height: 100%; 
-                overflow: auto; 
-                background-color: rgba(0,0,0,0.5); 
-                justify-content: center; 
-                align-items: center; 
+                top: 0;
+                width: 100%;
+                height: 100%;
+                margin-top: 20px;
+                overflow: auto;
+                background-color: rgba(0,0,0,0.5);
+                justify-content: center;
+                align-items: center;
             }
-            
+
             .modal-content {
                 background-color: #fff;
-                margin: auto; 
-                padding: 10px; /* Adjust padding as needed */
+                padding: 15px; /* Adjust padding as needed */
                 border: 1px solid #888;
-                width: 80%; 
-                max-width: 600px; 
+                width: 70%;
+                max-width: 400px;
+                max-height: 520px;
                 border-radius: 10px;
                 box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             }
 
-            /* Additional styles for full-screen overlay */
-            .modal-fullscreen {
+
+            .form-group {
+                margin-bottom: 10px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .location-form {
+                margin-top: -47px;
+                
+            }
+
+            .form-group label {
+                margin-bottom: 1px;
+                font-weight: bold;
+                font-size: 12px; /* Adjust font size */
+            }
+
+            .form-group input[type=text],
+            .form-group input[type=number],
+            .form-group input[type=file],
+            .form-group textarea {
+                padding: 5px; /* Adjust padding */
+                font-size: 12px; /* Adjust input font size */
+                border: 1px solid #ccc;
+                border-radius: 3px; /* Adjust border radius */
+                transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            }
+
+            .form-group input[type=text]:focus,
+            .form-group input[type=number]:focus,
+            .form-group input[type=file]:focus,
+            .form-group textarea:focus {
+                outline: none;
+                border-color: #1f5883;
+                box-shadow: 0 0 0 3px rgba(31, 88, 131, 0.1);
+            }
+
+            .form-group textarea {
+                resize: vertical; /* Allow vertical resizing of textarea */
+            }
+
+            .form-group.two-column {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px; /* Adjust gap between columns */
+            }
+
+            .form-group.two-column .form-group {
+                margin-bottom: 0; /* Remove margin between grouped elements */
+            }
+
+            .form-group.submit-button {
+                align-self: flex-start;
+            }
+
+            .form-group.submit-button input[type=submit] {
                 width: 100%;
-                height: 100%;
-                padding: 0;
-                max-width: none;
-                border-radius: 0;
+                padding: 8px;
+                font-size: 12px; /* Adjust button font size */
+                background-color: #1f5883;
+                color: white;
+                border: none;
+                border-radius: 3px; /* Adjust border radius */
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            .form-group.submit-button input[type=submit]:hover {
+                background-color: #174a6b;
+            }
+
+            .close {
+                margin-left: 100%;
             }
 
             /* Adjustments for smaller screens */
@@ -284,87 +369,10 @@
                 }
             }
 
-            /* General button styling */
-            .button {
-                background-color: #1f5883;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                cursor: pointer;
-                border-radius: 5px;
-                font-size: 1em;
-            }
-
-            .button:hover {
-                background-color: #174a6b;
-            }
-
-            /* Form styles */
-            .form-group {
-                margin-bottom: 20px;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .form-group label {
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
-
-            .form-group input[type=text], 
-            .form-group input[type=email], 
-            .form-group textarea {
-                padding: 10px;
-                font-size: 0.9em; /* Adjust input font size */
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-            }
-
-            .form-group input[type=text]:focus, 
-            .form-group input[type=email]:focus, 
-            .form-group textarea:focus {
-                outline: none;
-                border-color: #1f5883;
-                box-shadow: 0 0 0 3px rgba(31, 88, 131, 0.1);
-            }
-
-            .form-group textarea {
-                resize: vertical; /* Allow vertical resizing of textarea */
-            }
-
-            /* Two-column layout for form */
-            .form-group.two-column {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
-
-            /* Submit button */
-            .form-group.submit-button {
-                align-self: flex-start;
-            }
-
-            .form-group.submit-button button {
-                width: 100%;
-                padding: 12px;
-                font-size: 1em;
-                background-color: #1f5883;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                transition: background-color 0.3s ease;
-            }
-
-            .form-group.submit-button button:hover {
-                background-color: #174a6b;
-            }
-
             .change-password {
                 text-decoration: none;
-                padding: 10px;
-                margin: 22px 22px;
+                font-size: 12px;
+                margin-left: 20%;
             }
 
             /* logo style */
@@ -387,86 +395,110 @@
         
         <div class="sidebar" id="sidebar">
             <div class="navbar2">
-                <h1>Welcome, admin!</h1>
+                <h4>Welcome, admin!</h4>
                 <button class="button-logout" onclick="location.href='/logout'">Logout</button> <!-- Logout button -->
-                <a class="change-password" href="#">Change Password</a>
+                <p class="change-password">Change Password</p>
 
                 <button class="button-addloc" id="addLocationBtn">Add Location</button>
-            </div>
-
-            <div id="addLocationModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h1>Add Location</h1>
-                    <form class="location-form" id="add-location-form" action="/add-location" method="post" enctype="multipart/form-data">
-                        <label for="title">Title:</label>
-                        <input type="text" id="title" name="Title" required>
+                <div id="addLocationModal" class="modal">
+                    <div class="modal-content">
                         
-                        <label for="latitude">Latitude:</label>
-                        <input type="number" step="any" id="latitude" name="Latitude" required>
-        
-                        <label for="Longitude">Longitude:</label>
-                        <input type="number" step="any" id="longitude" name="Longitude" required>
-        
-                        <label for="image">Image:</label>
-                        <input type="file" id="image" name="image">
-
-                        <label for="Elevation_m">Elevation:</label>
-                        <input type="text" id="elevation_m" name="Elevation_m">
-
-                        <label for="basin">Basin Name:</label>
-                        <input type="text" id="basin" name="Basin_Name">
-                        
-                        <label for="area_km2">Area (km²):</label>
-                        <input type="number" step="any" id="area_km2" name="Area_km2">
-                        
-                        <label for="area_ha">Area (ha):</label>
-                        <input type="number" step="any" id="area_ha" name="Area_ha">
-                        
-                        <label for="perimeter">Perimeter:</label>
-                        <input type="number" step="any" id="perimeter" name="Perimeter">
-                        
-                        <label for="error_km2">Error (km²):</label>
-                        <input type="number" step="any" id="error_km2" name="Error_km2">
-                        
-                        <label for="error_ha">Error (ha):</label>
-                        <input type="number" step="any" id="error_ha" name="Error_ha">
-                        
-                        <label for="district">District:</label>
-                        <input type="text" id="district" name="District">
-                        
-                        <label for="gapa_napa">RM/M:</label>
-                        <input type="text" id="gapa_napa" name="GaPa_NaPa">
-                        
-                        <label for="ward_no">Ward No:</label>
-                        <input type="text" id="ward_no" name="Ward_No">
-        
-                        <label for="further_comments">Further Comments:</label>
-                        <textarea id="further_comments" name="further_comments"></textarea>
-        
-                        <label for="reference">Reference:</label>
-                        <input type="text" id="reference" name="reference">
-                        
-                        <input type="submit" value="Add Location">
+                        <form class="location-form" id="add-location-form" action="/add-location" method="post" enctype="multipart/form-data">
+                            <!-- <h2>Add Location</h2> -->
+                             <br><br>
+                             <span class="close">&times;</span>
+                            <div class="form-group two-column">
+                                <div class="form-group">
+                                    <label for="title">Name:</label>
+                                    <input type="text" id="title" name="Title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="latitude">Latitude:</label>
+                                    <input type="number" step="any" id="latitude" name="Latitude" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="longitude">Longitude:</label>
+                                    <input type="number" step="any" id="longitude" name="Longitude" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="image">Image:</label>
+                                    <input type="file" id="image" name="image">
+                                </div>
+                                <div class="form-group">
+                                    <label for="elevation_m">Elevation:</label>
+                                    <input type="text" id="elevation_m" name="Elevation_m">
+                                </div>
+                                <div class="form-group">
+                                    <label for="basin">Basin Name:</label>
+                                    <input type="text" id="basin" name="Basin_Name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="area_km2">Area (km²):</label>
+                                    <input type="number" step="any" id="area_km2" name="Area_km2">
+                                </div>
+                                <div class="form-group">
+                                    <label for="area_ha">Area (ha):</label>
+                                    <input type="number" step="any" id="area_ha" name="Area_ha">
+                                </div>
+                                <div class="form-group">
+                                    <label for="perimeter">Perimeter:</label>
+                                    <input type="number" step="any" id="perimeter" name="Perimeter">
+                                </div>
+                                <div class="form-group">
+                                    <label for="error_km2">Error (km²):</label>
+                                    <input type="number" step="any" id="error_km2" name="Error_km2">
+                                </div>
+                                <div class="form-group">
+                                    <label for="error_ha">Error (ha):</label>
+                                    <input type="number" step="any" id="error_ha" name="Error_ha">
+                                </div>
+                                <div class="form-group">
+                                    <label for="district">District:</label>
+                                    <input type="text" id="district" name="District">
+                                </div>
+                                <div class="form-group">
+                                    <label for="gapa_napa">RM/M:</label>
+                                    <input type="text" id="gapa_napa" name="GaPa_NaPa">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ward_no">Ward No:</label>
+                                    <input type="text" id="ward_no" name="Ward_No">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reference">Reference:</label>
+                                    <input type="text" id="reference" name="reference">
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label for="further_comments">Further Comments:</label>
+                                    <textarea id="further_comments" name="further_comments"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group submit-button">
+                                <input type="submit" value="Add Location">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div>
+                    <form id="upload-form" action="/upload-excel" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="excelFile" accept=".xls,.xlsx" required>
+                        <button class="button-upload" type="submit">Upload Excel File</button>
                     </form>
                 </div>
-            </div>
-            <div>
-                <form id="upload-form" action="/upload-excel" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="excelFile" accept=".xls,.xlsx" required>
-                    <button type="submit">Upload</button>
-                </form>
-            </div>
-            <div>
-                <form action="/delete-all-locations" method="POST" onsubmit="return confirm('Are you sure you want to delete all locations?');">
-                    <button type="submit">Delete All Locations</button>
-                </form>
-            </div>    
                 <div>
-                    <h2>Lakes</h2>
-                    <ul id="locations-list" class="location-list"></ul>
-                </div>
-        </div>
+                    <form action="/delete-all-locations" method="POST" onsubmit="return confirm('Are you sure you want to delete all locations?');">
+                        <button class="button-delete" type="submit">Delete All Locations</button>
+                    </form>
+                </div>    
+                    <div class="location-container">
+                        <h4>Lakes</h4>
+                        <ul id="locations-list" class="location-list"></ul>
+                    </div>
+            </div>
+            </div>
+
+            
 
         
 
@@ -487,7 +519,7 @@
             if (sidebar.classList.contains('close')) {
                 map.style.marginRight = '0';
             } else {
-                map.style.marginRight = '240px';
+                map.style.marginRight = '210px';
             }
         }
 
